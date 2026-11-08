@@ -1,5 +1,5 @@
-import { startFluid } from './fluid.js?v=20261108e';
-import PROJECTS from './projects.js?v=20261108e';
+import { startFluid } from './fluid.js?v=20261108f';
+import PROJECTS from './projects.js?v=20261108f';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -30,7 +30,7 @@ function fallbackMe() {
 function loadMe() {
   const gl = document.createElement('canvas').getContext('webgl2');
   if (!gl) return fallbackMe();
-  import('./memoji.js?v=20261108e').then(({ mountMemoji }) => {
+  import('./memoji.js?v=20261108f').then(({ mountMemoji }) => {
     return mountMemoji(meBtn, new URLSearchParams(location.search).has('still') ? { follow: 0 } : {});
   }).then((avatar) => {
     meBtn.avatar = avatar; // handy for tweaking from the console

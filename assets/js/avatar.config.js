@@ -25,10 +25,10 @@ export default {
     lens: '#8c9cff',       // blue-light tint
     lensOpacity: 0.12,
     // sizes in metres (the model is life-size): big, square, retro
-    width: 0.064, height: 0.044, thickness: 0.0048, roundness: 0.006,
+    width: 0.064, height: 0.054, thickness: 0.0048, roundness: 0.006,
     gap: 0.072,            // centre-to-centre distance of the two frames
-    armLength: 0.105,
-    earX: 0.074, earY: 0.004, // where the arms meet the ears
+    armLength: 0.1,
+    earX: 0.104, earY: -0.012, // where the arms meet the ears
     raise: -0.003,         // move up (+) / down (-)
     forward: 0.082,        // distance in front of the eyes
   },
@@ -40,7 +40,7 @@ export default {
   },
 
   // framing
-  frameY: -0.05,           // camera aim relative to the head bone (metres)
+  frameY: 0.012,           // camera aim relative to the head bone (metres)
   frameDistance: 1.16,
 
   // behaviour

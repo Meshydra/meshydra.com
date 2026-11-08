@@ -8,7 +8,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { VRMLoaderPlugin, VRMUtils } from 'https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js';
-import CFG from './avatar.config.js?v=20261108e';
+import CFG from './avatar.config.js?v=20261108f';
 
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -110,7 +110,7 @@ export async function mountMemoji(container, opts = {}) {
       // arm from the outer corner back to the ear (ear to ear)
       const from = new THREE.Vector3(s * (gap / 2 + w / 2 + t * 0.2), h * 0.3, -t * 0.2);
       const to = new THREE.Vector3(s * G.earX, h * 0.3 + G.earY, -G.armLength);
-      const arm = new THREE.Mesh(new THREE.BoxGeometry(t * 0.6, t * 0.85, from.distanceTo(to)), frameMat);
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(t * 0.95, t * 1.25, from.distanceTo(to)), frameMat);
       arm.position.copy(from).add(to).multiplyScalar(0.5);
       arm.lookAt(to); // the group is still at the origin here, so local = world
       glasses.add(arm);
