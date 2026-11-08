@@ -1,5 +1,5 @@
-import { startFluid } from './fluid.js?v=20261108g';
-import PROJECTS from './projects.js?v=20261108g';
+import { startFluid } from './fluid.js?v=20261108h';
+import PROJECTS from './projects.js?v=20261108h';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -30,7 +30,7 @@ function fallbackMe() {
 function loadMe() {
   const gl = document.createElement('canvas').getContext('webgl2');
   if (!gl) return fallbackMe();
-  import('./memoji.js?v=20261108g').then(({ mountMemoji }) => {
+  import('./memoji.js?v=20261108h').then(({ mountMemoji }) => {
     return mountMemoji(meBtn, new URLSearchParams(location.search).has('still') ? { follow: 0 } : {});
   }).then((avatar) => {
     meBtn.avatar = avatar; // handy for tweaking from the console
@@ -58,15 +58,6 @@ if (fill) {
 /* ---------- blur-in headings ---------- */
 const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -12% 0px' });
 $$('.blur-in').forEach((el) => io.observe(el));
-
-/* ---------- nav: mark the section you're in ---------- */
-const spy = $$('[data-spy]');
-const spyIO = new IntersectionObserver((es) => es.forEach((e) => {
-  if (e.isIntersecting) spy.forEach((a) => a.classList.toggle('on', a.dataset.spy === e.target.id));
-}), { rootMargin: '-45% 0px -50% 0px' });
-['work', 'about', 'contact'].forEach((id) => spyIO.observe(document.getElementById(id)));
-const heroIO = new IntersectionObserver(([e]) => { if (e.isIntersecting) spy.forEach((a) => a.classList.remove('on')); }, { threshold: 0.4 });
-heroIO.observe($('#hero'));
 
 /* ---------- project art (generated, no screenshots) ---------- */
 function rnd(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }

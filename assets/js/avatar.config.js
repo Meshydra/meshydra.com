@@ -44,7 +44,6 @@ export default {
   frameDistance: 1.16,
 
   // behaviour
-  wave: true,              // waves hello once per visit
   follow: 1.0,
   blink: true,
 };
