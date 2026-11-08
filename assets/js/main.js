@@ -1,5 +1,5 @@
-import { startFluid } from './fluid.js?v=20261108h';
-import PROJECTS from './projects.js?v=20261108h';
+import { startFluid } from './fluid.js?v=20261108i';
+import PROJECTS from './projects.js?v=20261108i';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -24,13 +24,13 @@ if (!reduce) {
 /* ---------- 3D me ---------- */
 const meBtn = $('#me');
 function fallbackMe() {
-  meBtn.insertAdjacentHTML('afterbegin', '<img src="/assets/img/memoji.png" alt="" width="563" height="595" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply">');
+  meBtn.insertAdjacentHTML('afterbegin', '<img src="/assets/img/memoji.png" alt="" width="553" height="622" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply">');
   meBtn.classList.add('ready');
 }
 function loadMe() {
   const gl = document.createElement('canvas').getContext('webgl2');
   if (!gl) return fallbackMe();
-  import('./memoji.js?v=20261108h').then(({ mountMemoji }) => {
+  import('./memoji.js?v=20261108i').then(({ mountMemoji }) => {
     return mountMemoji(meBtn, new URLSearchParams(location.search).has('still') ? { follow: 0 } : {});
   }).then((avatar) => {
     meBtn.avatar = avatar; // handy for tweaking from the console
@@ -227,11 +227,11 @@ $('#copy').addEventListener('click', async (e) => {
   setTimeout(() => { b.textContent = 'Copy'; }, 1800);
 });
 
-/* ---------- background music (10%), starts on the first interaction ---------- */
+/* ---------- background music (5%), starts on the first interaction ---------- */
 (() => {
   const audio = $('#bgm'), btn = $('#sound');
   if (!audio || !btn) return;
-  audio.volume = 0.1;
+  audio.volume = 0.05;
   let muted = false;
   try { muted = localStorage.getItem('meshydra-muted') === '1'; } catch {}
   const paint = () => {
@@ -246,7 +246,7 @@ $('#copy').addEventListener('click', async (e) => {
     e.stopPropagation();
     muted = !muted;
     try { localStorage.setItem('meshydra-muted', muted ? '1' : '0'); } catch {}
-    if (muted) audio.pause(); else { audio.volume = 0.1; audio.play().catch(() => {}); }
+    if (muted) audio.pause(); else { audio.volume = 0.05; audio.play().catch(() => {}); }
     paint();
   });
   // Browsers only allow sound after the visitor does something on the page.
