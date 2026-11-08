@@ -1,5 +1,5 @@
-import { startFluid } from './fluid.js?v=20261108f';
-import PROJECTS from './projects.js?v=20261108f';
+import { startFluid } from './fluid.js?v=20261108g';
+import PROJECTS from './projects.js?v=20261108g';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -30,7 +30,7 @@ function fallbackMe() {
 function loadMe() {
   const gl = document.createElement('canvas').getContext('webgl2');
   if (!gl) return fallbackMe();
-  import('./memoji.js?v=20261108f').then(({ mountMemoji }) => {
+  import('./memoji.js?v=20261108g').then(({ mountMemoji }) => {
     return mountMemoji(meBtn, new URLSearchParams(location.search).has('still') ? { follow: 0 } : {});
   }).then((avatar) => {
     meBtn.avatar = avatar; // handy for tweaking from the console
@@ -134,7 +134,9 @@ grid.innerHTML = PROJECTS.map((p, i) => {
   const attrs = p.link ? ` href="${p.link}" target="_blank" rel="noopener"` : '';
   const badge = p.badge ? `<span class="badge${p.badge === 'Code' ? ' code' : ''}">${p.badge === 'Code' ? 'Code ↗' : p.badge}</span>` : '';
   return `<${tag} class="card" data-k="${p.kind}" style="--c:var(--${p.colour})"${attrs}>
-    <div class="art"><span class="no">${String(i + 1).padStart(2, '0')}</span>${badge}${art(p, i)}</div>
+    <div class="art${p.img ? ' photo' : ''}"><span class="no">${String(i + 1).padStart(2, '0')}</span>${badge}${p.img
+      ? `<img src="/assets/img/projects/${p.img}.jpg" alt="${p.title}" width="880" height="605" loading="lazy" decoding="async">`
+      : art(p, i)}</div>
     <div class="meta"><h3>${p.title}</h3><span class="yr">${p.year}</span></div>
     <p>${p.line}</p>
   </${tag}>`;

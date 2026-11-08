@@ -8,7 +8,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { VRMLoaderPlugin, VRMUtils } from 'https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js';
-import CFG from './avatar.config.js?v=20261108f';
+import CFG from './avatar.config.js?v=20261108g';
 
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -69,6 +69,25 @@ export async function mountMemoji(container, opts = {}) {
   setRot('leftLowerArm', 0, -0.2, 0); setRot('rightLowerArm', 0, 0.2, 0);
   vrm.update(0);
   vrm.scene.updateMatrixWorld(true);
+
+  // ---- hello wave (once per visit) --------------------------------------
+  const REST = { u: [0, 0, -1.25], l: [0, 0.2, 0] };     // right arm down
+  const UP = { u: [0.6, 1.2, -0.6], l: [0, 0, 2.15] };   // hand up beside the head, palm out
+  let waveT = -1;
+  let waved = false;
+  try { waved = sessionStorage.getItem('meshydra-waved') === '1'; } catch {}
+  const startWave = () => {
+    if (waved || !C.wave) return;
+    waved = true; waveT = 0;
+    try { sessionStorage.setItem('meshydra-waved', '1'); } catch {}
+  };
+  const ease = (x) => x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+  const armTo = (k, wig) => {
+    const ua = bone('rightUpperArm'), la = bone('rightLowerArm');
+    ua.rotation.set(...REST.u.map((r, i) => lerp(r, UP.u[i], k)));
+    la.rotation.set(...REST.l.map((r, i) => lerp(r, UP.l[i], k)));
+    la.rotation.z += wig;
+  };
 
   // ---- framing: head and shoulders --------------------------------------
   const headNode = H.getRawBoneNode('head');
@@ -200,11 +219,20 @@ export async function mountMemoji(container, opts = {}) {
         if (blinkT >= 0.16) { blinkT = -1; blinkAt = now + 2200 + Math.random() * 3500; setEx('blink', 0); }
       }
     }
+    if (waveT >= 0) {
+      waveT += dt;
+      const up = 0.45, swing = 1.6, down = 0.55;
+      if (waveT < up) armTo(ease(waveT / up), 0);
+      else if (waveT < up + swing) armTo(1, Math.sin((waveT - up) / swing * Math.PI * 6) * 0.32);
+      else if (waveT < up + swing + down) armTo(1 - ease((waveT - up - swing) / down), 0);
+      else { armTo(0, 0); waveT = -1; }
+    }
     vrm.update(dt);
     renderer.render(scene, camera);
     raf = requestAnimationFrame(tick);
   }
   raf = requestAnimationFrame(tick);
+  setTimeout(startWave, 700);
   new IntersectionObserver(([en]) => {
     visible = en.isIntersecting;
     if (visible && !raf) { clock.getDelta(); raf = requestAnimationFrame(tick); }
