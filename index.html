@@ -39,8 +39,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@600&display=swap&text=%E0%B6%86%E0%B6%BA%E0%B7%94%E0%B6%B6%E0%B7%9D%E0%B7%80%E0%B6%B1%E0%B7%8A%E0%B6%B8%E0%B7%84%E0%B6%B1%E0%B7%94%E0%B7%80%E0%B6%BB!">
-<link rel="stylesheet" href="/assets/css/site.css?v=20261108">
-<link rel="modulepreload" href="/assets/js/main.js?v=20261108">
+<link rel="stylesheet" href="/assets/css/site.css?v=20261108e">
+<link rel="modulepreload" href="/assets/js/main.js?v=20261108e">
 
 <script type="importmap">
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }
@@ -140,22 +140,14 @@
   <!-- 01 · hero -->
   <header class="hero" id="hero">
     <div class="hero-in">
-      <button class="me" id="me" type="button" aria-label="Say hello to Mesh">
+      <div class="me" id="me" role="img" aria-label="3D cartoon of Mesh Ariyawansa">
         <span class="me-ph" aria-hidden="true"></span>
-        <span class="bubble" id="bubble" aria-live="polite"></span>
-      </button>
-      <p class="hi reveal"><span class="si" lang="si">ආයුබෝවන්</span> I'm Mesh <span class="wave" aria-hidden="true">👋</span></p>
-      <h1 class="reveal"><span class="sr">Mesh Ariyawansa. </span>I help <em>small</em> businesses <span class="grad">win.</span></h1>
-      <p class="sub reveal">Take care of the small ones.</p>
-      <div class="chips reveal">
-        <a class="chip" href="#work"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="3"/><path d="M3 9h18"/></svg>Work</a>
-        <a class="chip" href="#about"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Me</a>
-        <a class="chip" href="#make"><svg viewBox="0 0 24 24"><path d="M14 4l6 6-10 10H4v-6z"/></svg>What I make</a>
-        <a class="chip" href="#contact"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>Say hi</a>
       </div>
+      <p class="hi reveal">Hey, it's Mesh Ariyawansa <span class="wave" aria-hidden="true">👋</span></p>
+      <h1 class="reveal">I help <em>small</em> businesses <span class="grad">win.</span></h1>
+      <p class="sub reveal">Take care of the small ones.</p>
     </div>
     <div class="giant" aria-hidden="true">MESHYDRA</div>
-    <a class="scroll-cue" href="#story" aria-label="Scroll down"><span></span></a>
   </header>
 
   <!-- 02 · statement, fills word by word -->
@@ -187,11 +179,16 @@
           <button role="tab" aria-selected="false" data-f="app">Apps</button>
           <button role="tab" aria-selected="false" data-f="tool">Tools</button>
         </div>
+        <div class="rail-nav">
+          <button class="rail-btn prev" type="button" aria-label="Previous projects">‹</button>
+          <button class="rail-btn next" type="button" aria-label="More projects">›</button>
+        </div>
       </div>
-      <div class="grid" id="grid"></div>
-      <div class="more-wrap"><button class="more" id="more" type="button">Show everything</button></div>
-      <p class="note">Client names stay private. These are the shapes of the work.</p>
     </div>
+    <div class="rail-wrap">
+      <div class="grid rail" id="grid" tabindex="0" aria-label="Projects, scroll sideways for more"></div>
+    </div>
+    <div class="wrap"><p class="note">Client names stay private. These are the shapes of the work.</p></div>
   </section>
 
   <!-- 05 · toolkit marquee -->
@@ -227,10 +224,10 @@
     </div>
   </section>
 
-  <!-- 08 · notes -->
+  <!-- 08 · blogs -->
   <section class="notes" aria-labelledby="notes-h">
     <div class="wrap">
-      <div class="sec-head"><span class="num">04</span><h2 id="notes-h" class="blur-in">Notes</h2><a class="link" href="https://blog.meshydra.com" target="_blank" rel="noopener">All notes ↗</a></div>
+      <div class="sec-head"><span class="num">04</span><h2 id="notes-h" class="blur-in">Blogs</h2><a class="link" href="https://blog.meshydra.com" target="_blank" rel="noopener">All blogs ↗</a></div>
       <div class="note-row">
         <a class="note-card" style="--c:var(--green)" href="https://blog.meshydra.com/2026/03/the-start-investing-in-sri-lankas-stock.html" target="_blank" rel="noopener"><span class="d">Mar 2026</span><b>The start: investing in Sri Lanka's stock market</b></a>
         <a class="note-card" style="--c:var(--orange)" href="https://blog.meshydra.com/2026/04/first-dividence-and-avrudhu-time.html" target="_blank" rel="noopener"><span class="d">Apr 2026</span><b>First dividend and Avurudu time</b></a>
@@ -262,6 +259,13 @@
   </section>
 </main>
 
+<audio id="bgm" src="/assets/audio/jazz.mp3" loop preload="none"></audio>
+<button class="sound" id="sound" type="button" aria-label="Mute music" aria-pressed="false">
+  <svg class="on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+  <svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
+  <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+</button>
+
 <footer class="foot">
   <div class="wrap foot-in">
     <span>© 2026 Mesh Ariyawansa · Meshydra</span>
@@ -276,6 +280,6 @@
 </footer>
 
 <script src="/assets/vendor/lenis.min.js" defer></script>
-<script type="module" src="/assets/js/main.js?v=20261108"></script>
+<script type="module" src="/assets/js/main.js?v=20261108e"></script>
 </body>
 </html>

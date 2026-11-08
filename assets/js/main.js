@@ -1,5 +1,5 @@
-import { startFluid } from './fluid.js';
-import PROJECTS from './projects.js';
+import { startFluid } from './fluid.js?v=20261108e';
+import PROJECTS from './projects.js?v=20261108e';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -22,8 +22,7 @@ if (!reduce) {
 }
 
 /* ---------- 3D me ---------- */
-const meBtn = $('#me'), bubble = $('#bubble');
-let me = null;
+const meBtn = $('#me');
 function fallbackMe() {
   meBtn.insertAdjacentHTML('afterbegin', '<img src="/assets/img/memoji.png" alt="" width="563" height="595" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply">');
   meBtn.classList.add('ready');
@@ -31,20 +30,14 @@ function fallbackMe() {
 function loadMe() {
   const gl = document.createElement('canvas').getContext('webgl2');
   if (!gl) return fallbackMe();
-  import('./memoji.js').then(({ mountMemoji }) => {
-    me = mountMemoji(meBtn);
+  import('./memoji.js?v=20261108e').then(({ mountMemoji }) => {
+    return mountMemoji(meBtn, new URLSearchParams(location.search).has('still') ? { follow: 0 } : {});
+  }).then((avatar) => {
+    meBtn.avatar = avatar; // handy for tweaking from the console
     meBtn.classList.add('ready');
-  }).catch(fallbackMe);
+  }).catch((e) => { console.error('3D avatar failed, showing picture', e); fallbackMe(); });
 }
 (window.requestIdleCallback || ((f) => setTimeout(f, 200)))(loadMe);
-let bubbleT;
-meBtn.addEventListener('click', () => {
-  const say = me ? me.greet() : 'ආයුබෝවන්!';
-  bubble.textContent = say;
-  bubble.classList.add('show');
-  clearTimeout(bubbleT);
-  bubbleT = setTimeout(() => bubble.classList.remove('show'), 1800);
-});
 
 /* ---------- statement fills word by word ---------- */
 const fill = $('[data-fill]');
@@ -140,7 +133,7 @@ grid.innerHTML = PROJECTS.map((p, i) => {
   const tag = p.link ? 'a' : 'div';
   const attrs = p.link ? ` href="${p.link}" target="_blank" rel="noopener"` : '';
   const badge = p.badge ? `<span class="badge${p.badge === 'Code' ? ' code' : ''}">${p.badge === 'Code' ? 'Code ↗' : p.badge}</span>` : '';
-  return `<${tag} class="card${p.featured ? '' : ' extra'}" data-k="${p.kind}" style="--c:var(--${p.colour})"${attrs}>
+  return `<${tag} class="card" data-k="${p.kind}" style="--c:var(--${p.colour})"${attrs}>
     <div class="art"><span class="no">${String(i + 1).padStart(2, '0')}</span>${badge}${art(p, i)}</div>
     <div class="meta"><h3>${p.title}</h3><span class="yr">${p.year}</span></div>
     <p>${p.line}</p>
@@ -148,21 +141,31 @@ grid.innerHTML = PROJECTS.map((p, i) => {
 }).join('');
 
 const cards = $$('.card', grid);
-const moreBtn = $('#more');
+const prevBtn = $('.rail-btn.prev'), nextBtn = $('.rail-btn.next');
+function railArrows() {
+  const max = grid.scrollWidth - grid.clientWidth - 4;
+  prevBtn.disabled = grid.scrollLeft <= 4;
+  nextBtn.disabled = grid.scrollLeft >= max;
+}
+const stepW = () => (cards.find((c) => !c.classList.contains('hidden'))?.offsetWidth || 400) + 22;
+prevBtn.addEventListener('click', () => grid.scrollBy({ left: -stepW() * 2, behavior: reduce ? 'auto' : 'smooth' }));
+nextBtn.addEventListener('click', () => grid.scrollBy({ left: stepW() * 2, behavior: reduce ? 'auto' : 'smooth' }));
+grid.addEventListener('scroll', railArrows, { passive: true });
+addEventListener('resize', railArrows);
+
 function applyFilter(f) {
   cards.forEach((c) => {
     c.classList.toggle('hidden', f !== 'all' && c.dataset.k !== f);
     c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
   });
-  // a filter shows every matching project
-  if (f !== 'all') grid.classList.add('all');
-  moreBtn.parentElement.hidden = grid.classList.contains('all');
+  grid.scrollTo({ left: 0 });
+  railArrows();
 }
 $$('.filters button').forEach((b) => b.addEventListener('click', () => {
   $$('.filters button').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
   applyFilter(b.dataset.f);
 }));
-moreBtn.addEventListener('click', () => { grid.classList.add('all'); applyFilter($('.filters [aria-selected="true"]').dataset.f); });
+railArrows();
 
 /* ---------- toolkit marquee ---------- */
 const TOOLS = [
@@ -230,3 +233,32 @@ $('#copy').addEventListener('click', async (e) => {
   catch { b.textContent = 'hello@meshydra.com'; }
   setTimeout(() => { b.textContent = 'Copy'; }, 1800);
 });
+
+/* ---------- background music (10%), starts on the first interaction ---------- */
+(() => {
+  const audio = $('#bgm'), btn = $('#sound');
+  if (!audio || !btn) return;
+  audio.volume = 0.1;
+  let muted = false;
+  try { muted = localStorage.getItem('meshydra-muted') === '1'; } catch {}
+  const paint = () => {
+    btn.classList.toggle('muted', muted);
+    btn.classList.toggle('playing', !audio.paused && !muted);
+    btn.setAttribute('aria-pressed', String(muted));
+    btn.setAttribute('aria-label', muted ? 'Play music' : 'Mute music');
+  };
+  const play = () => { if (!muted) audio.play().then(paint).catch(paint); };
+  audio.addEventListener('play', paint); audio.addEventListener('pause', paint);
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    muted = !muted;
+    try { localStorage.setItem('meshydra-muted', muted ? '1' : '0'); } catch {}
+    if (muted) audio.pause(); else { audio.volume = 0.1; audio.play().catch(() => {}); }
+    paint();
+  });
+  // Browsers only allow sound after the visitor does something on the page.
+  const kick = () => { ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((t) => removeEventListener(t, kick)); play(); };
+  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((t) => addEventListener(t, kick, { passive: true }));
+  play(); // works straight away where autoplay is allowed
+  paint();
+})();
