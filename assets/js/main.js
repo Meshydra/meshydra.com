@@ -1,5 +1,5 @@
-import { startFluid } from './fluid.js?v=20261108i';
-import PROJECTS from './projects.js?v=20261108i';
+import { startFluid } from './fluid.js?v=20261108j';
+import PROJECTS from './projects.js?v=20261108j';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -30,7 +30,7 @@ function fallbackMe() {
 function loadMe() {
   const gl = document.createElement('canvas').getContext('webgl2');
   if (!gl) return fallbackMe();
-  import('./memoji.js?v=20261108i').then(({ mountMemoji }) => {
+  import('./memoji.js?v=20261108j').then(({ mountMemoji }) => {
     return mountMemoji(meBtn, new URLSearchParams(location.search).has('still') ? { follow: 0 } : {});
   }).then((avatar) => {
     meBtn.avatar = avatar; // handy for tweaking from the console
@@ -231,7 +231,8 @@ $('#copy').addEventListener('click', async (e) => {
 (() => {
   const audio = $('#bgm'), btn = $('#sound');
   if (!audio || !btn) return;
-  audio.volume = 0.05;
+  const VOL = 0.05;
+  audio.volume = VOL;
   let muted = false;
   try { muted = localStorage.getItem('meshydra-muted') === '1'; } catch {}
   const paint = () => {
@@ -240,18 +241,49 @@ $('#copy').addEventListener('click', async (e) => {
     btn.setAttribute('aria-pressed', String(muted));
     btn.setAttribute('aria-label', muted ? 'Play music' : 'Mute music');
   };
-  const play = () => { if (!muted) audio.play().then(paint).catch(paint); };
+
+  // iPhone/iPad ignore audio.volume, so the level goes through a Web Audio gain node.
+  // It can only be created during a click/tap/key press, so it's set up on the first one.
+  let ctx = null;
+  const ensureGain = () => {
+    if (ctx) { if (ctx.state === 'suspended') ctx.resume().catch(() => {}); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      ctx = new AC();
+      const gain = ctx.createGain();
+      gain.gain.value = VOL;
+      ctx.createMediaElementSource(audio).connect(gain).connect(ctx.destination);
+      audio.volume = 1; // the gain node does the turning down now
+      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    } catch { ctx = null; audio.volume = VOL; }
+  };
+
+  // Only clicks, taps and key presses let a page start sound (scrolling and the start of a
+  // touch don't), so keep listening until playback has really started.
+  const GESTURES = ['pointerdown', 'pointerup', 'click', 'keydown', 'touchend'];
+  const stopListening = () => GESTURES.forEach((t) => removeEventListener(t, onGesture, true));
+  function onGesture(e) {
+    if (e && e.target && btn.contains(e.target)) return; // the mute button handles itself
+    if (muted) { stopListening(); return; }
+    ensureGain();
+    if (!audio.paused) { stopListening(); return; }
+    audio.play().then(() => { stopListening(); paint(); }).catch(paint);
+  }
+  GESTURES.forEach((t) => addEventListener(t, onGesture, { capture: true, passive: true }));
+
   audio.addEventListener('play', paint); audio.addEventListener('pause', paint);
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     muted = !muted;
     try { localStorage.setItem('meshydra-muted', muted ? '1' : '0'); } catch {}
-    if (muted) audio.pause(); else { audio.volume = 0.05; audio.play().catch(() => {}); }
+    if (muted) audio.pause();
+    else { ensureGain(); audio.play().catch(() => {}); }
     paint();
   });
-  // Browsers only allow sound after the visitor does something on the page.
-  const kick = () => { ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((t) => removeEventListener(t, kick)); play(); };
-  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((t) => addEventListener(t, kick, { passive: true }));
-  play(); // works straight away where autoplay is allowed
+  // Coming back to the tab: carry on if it was playing.
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx && ctx.state === 'suspended' && !muted) ctx.resume().catch(() => {}); });
+
+  if (!muted) audio.play().then(() => { stopListening(); paint(); }).catch(paint); // autoplay where allowed
   paint();
 })();
